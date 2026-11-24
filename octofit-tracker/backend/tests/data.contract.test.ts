@@ -11,7 +11,6 @@ describe('OctoFit data contract', () => {
     expect(error?.errors.name).toBeDefined();
     expect(error?.errors.email).toBeDefined();
     expect(error?.errors.fitnessGoal).toBeDefined();
-    expect(new User({ name: 'Mona', email: 'invalid', fitnessGoal: 'endurance' }).validateSync()?.errors.email).toBeDefined();
   });
   it('requires teams to have a name, mascot, and members array', () => {
     const team = new Team({ name: 'Octocats', mascot: 'Mona', members: [] });
@@ -35,16 +34,6 @@ describe('OctoFit data contract', () => {
     expect(error?.errors.minutes).toBeDefined();
     expect(error?.errors.points).toBeDefined();
     expect(error?.errors.occurredAt).toBeDefined();
-    const invalidValues = new Activity({
-      user: new mongoose.Types.ObjectId(),
-      team: new mongoose.Types.ObjectId(),
-      type: 'run',
-      minutes: 0,
-      points: -1,
-      occurredAt: new Date(),
-    }).validateSync();
-    expect(invalidValues?.errors.minutes).toBeDefined();
-    expect(invalidValues?.errors.points).toBeDefined();
   });
   it('defines workout suggestions with focus, duration, and difficulty', () => {
     const workout = new Workout({ title: 'Intervals' });

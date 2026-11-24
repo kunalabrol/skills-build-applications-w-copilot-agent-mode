@@ -37,17 +37,21 @@ describe('OctoFit presentation contract', () => {
     renderRoute('/activities');
     expect(screen.getByRole('heading', { name: /activities/i })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/run/i)).toBeInTheDocument());
+    expect(screen.getByText(/30 minutes, 30 points/)).toBeInTheDocument();
   });
 
   it('renders teams, leaderboard, and workout suggestions with accessible content', async () => {
     const teams = renderRoute('/teams');
     await waitFor(() => expect(screen.getByText(/Octocats/)).toBeInTheDocument());
+    expect(screen.getByText(/1 members/)).toBeInTheDocument();
     teams.unmount();
     const leaderboard = renderRoute('/leaderboard');
     await waitFor(() => expect(screen.getByText(/90/)).toBeInTheDocument());
+    expect(screen.getByText(/Rank 1: Octocats/)).toBeInTheDocument();
     leaderboard.unmount();
     renderRoute('/workouts');
     await waitFor(() => expect(screen.getByText(/Intervals/)).toBeInTheDocument());
+    expect(screen.getByText(/Build endurance/)).toBeInTheDocument();
   });
 
   it('requests workout suggestions for a specific user', async () => {

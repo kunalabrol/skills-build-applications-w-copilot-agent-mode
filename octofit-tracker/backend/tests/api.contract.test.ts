@@ -40,6 +40,14 @@ describe('OctoFit API contract', () => {
       expect(response.status).toBeGreaterThanOrEqual(400);
       expect(response.status).toBeLessThan(500);
     }
+    for (const invalidActivity of [{ type: 'run', minutes: 0 }, { type: ' ', minutes: 30 }]) {
+      const response = await request(app).post('/api/activities').send({
+        userId: user._id.toString(),
+        teamId: team._id.toString(),
+        ...invalidActivity,
+      });
+      expect(response.status).toBe(400);
+    }
     expect(await Activity.countDocuments()).toBe(0);
     const created = await request(app).post('/api/activities').send({ userId: user._id.toString(), teamId: team._id.toString(), type: 'run', minutes: 30 });
     expect(created.status).toBe(201);
@@ -55,6 +63,8 @@ describe('OctoFit API contract', () => {
     const member = await User.create({ name: 'Mona', email: 'mona@example.com', fitnessGoal: 'endurance' });
     const invalid = await request(app).post('/api/teams').send({ mascot: 'Mona' });
     expect(invalid.status).toBe(400);
+    const invalidMembers = await request(app).post('/api/teams').send({ name: 'Octocats', mascot: 'Mona', members: ['not-an-id'] });
+    expect(invalidMembers.status).toBe(400);
     const created = await request(app).post('/api/teams').send({ name: 'Octocats', mascot: 'Mona', members: [member._id.toString()] });
     expect(created.status).toBe(201);
     expect(created.body.team).toMatchObject({ name: 'Octocats', mascot: 'Mona' });
@@ -81,6 +91,7 @@ describe('OctoFit API contract', () => {
   it('suggests workouts that match each user activity pattern', async () => {
     const mona = await createUserAndTeam('Mona', 'mona@example.com', 'Mona', 'Octocats');
     const hubot = await createUserAndTeam('Hubot', 'hubot@example.com', 'Hubot', 'Robocats');
+    await User.updateOne({ _id: mona.user._id }, { $set: { fitnessGoal: 'mobility' } });
     await User.updateOne({ _id: hubot.user._id }, { $set: { fitnessGoal: 'strength' } });
     await Activity.create([
       { user: mona.user._id, team: mona.team._id, type: 'run', minutes: 40, points: 40, occurredAt: new Date() },
